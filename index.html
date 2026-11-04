@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MADAD Connect | National Help Discovery & Resolution Network</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React 18 & ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel Standalone (for JSX in browser) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #ffffff;
+      background-image: 
+        radial-gradient(at 10% 12%, rgba(254, 215, 170, 0.45) 0px, transparent 55%),
+        radial-gradient(at 90% 10%, rgba(224, 231, 255, 0.5) 0px, transparent 50%),
+        radial-gradient(at 5% 65%, rgba(187, 247, 208, 0.4) 0px, transparent 50%),
+        radial-gradient(at 95% 75%, rgba(243, 232, 255, 0.45) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: #1e293b;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // --- SEED PROVIDERS ACROSS 5 CATEGORIES ---
+    const INITIAL_PROVIDERS = [
+      {
+        id: "p-edu-01",
+        name: "Shiksha Sahyog Foundation",
+        description: "Provides free textbooks, school stationery kits, and remedial tutoring support for primary and secondary government school students.",
+        categories: ["education"],
+        phone: "+91 98112 34567",
+        city: "New Delhi",
+        state: "Delhi",
+        pin_code: "110058",
+        service_areas: ["New Delhi", "West Delhi", "Dwarka"],
+        eligibility_criteria: "Enrolled in class 1-10 in government or aided schools with family income below ₹2.5L/year.",
+        assistance_types: ["Books & Notebooks", "School Supplies", "Study Materials"],
+        verification_status: "verified",
+        availability_status: "available",
+        total_contact_attempts: 42,
+        successful_resolutions: 38
+      },
+      {
+        id: "p-edu-02",
+        name: "Vidya Deep Trust",
+        description: "Higher secondary and vocational scholarship guidance, pre-matric coaching, and educational mentorship.",
+        categories: ["education"],
+        phone: "+91 98200 45678",
+        city: "Mumbai",
+        state: "Maharashtra",
+        pin_code: "400028",
+        service_areas: ["Mumbai", "Thane", "Navi Mumbai"],
+        eligibility_criteria: "Students appearing for 10th or 12th board exams needing tuition or fee assistance.",
+        assistance_types: ["Tuition Assistance", "Scholarship Guidance"],
+        verification_status: "verified",
+        availability_status: "available",
+        total_contact_attempts: 31,
+        successful_resolutions: 26
+      },
+      {
+        id: "p-food-01",
+        name: "Aahar Sewa Community Kitchen",
+        description: "Daily cooked hot meals and weekly dry grocery rations for daily wage workers and destitute families.",
+        categories: ["food_and_essentials"],
+        phone: "+91 94150 12345",
+        city: "Lucknow",
+        state: "Uttar Pradesh",
+        pin_code: "226004",
+        service_areas: ["Lucknow", "Charbagh", "Aminabad"],
+        eligibility_criteria: "Families without regular income, homeless persons, and emergency food crisis cases.",
+        assistance_types: ["Cooked Meals", "Grocery Rations"],
+        verification_status: "verified",
+        availability_status: "available",
+        total_contact_attempts: 65,
+        successful_resolutions: 61
+      },
+      {
+        id: "p-food-02",
+        name: "Bengaluru Annapoorna Collective",
+        description: "Emergency grocery kits (rice, pulses, oil, flour) delivered to distressed urban households.",
+        categories: ["food_and_essentials"],
+        phone: "+91 80223 98765",
+        city: "Bengaluru",
+        state: "Karnataka",
+        pin_code: "560027",
+        service_areas: ["Bengaluru", "South Bengaluru"],
+        eligibility_criteria: "Immediate food emergency or stranded migrant workers.",
+        assistance_types: ["Dry Ration Kits", "Emergency Food Aid"],
+        verification_status: "verified",
+        availability_status: "limited",
+        total_contact_attempts: 29,
+        successful_resolutions: 25
+      },
+      {
+        id: "p-med-01",
+        name: "Jeevan Raksha Patient Navigators",
+        description: "Guidance for government tertiary care hospitals, blood donor coordination, and non-emergency medicine subsidies.",
+        categories: ["medical_assistance"],
+        phone: "+91 97110 56789",
+        city: "New Delhi",
+        state: "Delhi",
+        pin_code: "110029",
+        service_areas: ["New Delhi", "NCR", "South Delhi"],
+        eligibility_criteria: "Economically weaker section patients. Life-threatening emergencies must dial 112/108 directly.",
+        assistance_types: ["Hospital Navigation", "Blood Donor Coordination"],
+        verification_status: "verified",
+        availability_status: "available",
+        total_contact_attempts: 53,
+        successful_resolutions: 47
+      },
+      {
+        id: "p-she-01",
+        name: "Basera Night Shelter & Care",
+        description: "Temporary overnight shelter, bedding, clean hygiene facilities, and reintegration support.",
+        categories: ["shelter_and_support"],
+        phone: "+91 98108 90123",
+        city: "New Delhi",
+        state: "Delhi",
+        pin_code: "110006",
+        service_areas: ["New Delhi", "North Delhi"],
+        eligibility_criteria: "Unhoused individuals or stranded travelers needing temporary shelter.",
+        assistance_types: ["Overnight Shelter", "Bedding & Hygiene"],
+        verification_status: "verified",
+        availability_status: "available",
+        total_contact_attempts: 38,
+        successful_resolutions: 35
+      },
+      {
+        id: "p-com-01",
+        name: "Saanjh Vridh Sahayata Sangathan",
+        description: "Assistance for senior citizens living alone: medical escort, pension paperwork help, and companionship.",
+        categories: ["community_support"],
+        phone: "+91 98290 67890",
+        city: "Jaipur",
+        state: "Rajasthan",
+        pin_code: "302015",
+        service_areas: ["Jaipur", "Rajasthan Regional"],
+        eligibility_criteria: "Senior citizens aged 60+ requiring physical or documentation assistance.",
+        assistance_types: ["Senior Citizen Support", "Pension Paperwork Help"],
+        verification_status: "verified",
+        availability_status: "available",
+        total_contact_attempts: 24,
+        successful_resolutions: 22
+      }
+    ];
+
+    const INITIAL_REQUESTS = [
+      {
+        id: "req-demo-01",
+        tracking_code: "MD-2026-EDU1",
+        category: "education",
+        title: "Need 9th class science & math NCERT books",
+        description: "My daughter is studying in government senior secondary school. Due to temporary job disruption, I am unable to purchase books this term.",
+        city: "New Delhi",
+        state: "Delhi",
+        pin_code: "110058",
+        urgency: "urgent",
+        assistance_type: "Books & Study Material",
+        contact_phone_masked: "+91 98711 ••••5",
+        status: "matched",
+        created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+        timeline: [
+          {
+            update_title: "Request Registered & Matched",
+            update_description: "Case registered for New Delhi. Matched with Shiksha Sahyog Foundation.",
+            created_at: new Date(Date.now() - 86400000 * 2).toISOString()
+          }
+        ]
+      },
+      {
+        id: "req-demo-02",
+        tracking_code: "MD-2026-FOD2",
+        category: "food_and_essentials",
+        title: "Dry ration kit needed for family of 4 in Aminabad",
+        description: "Injured foot, unable to ply rickshaw for two weeks. Need flour, rice, and cooking oil until resuming work.",
+        city: "Lucknow",
+        state: "Uttar Pradesh",
+        pin_code: "226004",
+        urgency: "standard",
+        assistance_type: "Grocery Rations",
+        contact_phone_masked: "+91 94155 ••••9",
+        status: "resolved_by_user_confirmation",
+        created_at: new Date(Date.now() - 86400000 * 4).toISOString(),
+        timeline: [
+          {
+            update_title: "Request Registered",
+            update_description: "Matched with Aahar Sewa Community Kitchen.",
+            created_at: new Date(Date.now() - 86400000 * 4).toISOString()
+          },
+          {
+            update_title: "Help Confirmed by Beneficiary",
+            update_description: "Beneficiary explicitly verified receiving dry ration kit. Case closed successfully.",
+            created_at: new Date(Date.now() - 3600000 * 4).toISOString()
+          }
+        ]
+      }
+    ];
+
+    // --- DETERMINISTIC MATCHING ENGINE ---
+    function runMatching(req, providersList) {
+      const tokens = (req.title + " " + req.description).toLowerCase().split(/\s+/).filter(w => w.length > 2);
+      
+      const scored = providersList.map(p => {
+        let score = 0;
+        const reasons = [];
+
+        if (p.categories.includes(req.category)) {
+          score += 40;
+          reasons.push(`Direct category match in ${req.category.replace(/_/g, ' ')}`);
+        }
+
+        const pText = (p.name + " " + p.description + " " + p.assistance_types.join(" ")).toLowerCase();
+        let kwHits = tokens.filter(t => pText.includes(t)).length;
+        if (kwHits > 0) {
+          score += Math.min(25, kwHits * 6);
+          reasons.push("Matches relevant keywords in your request");
+        }
+
+        if (req.pin_code && p.pin_code === req.pin_code) {
+          score += 20;
+          reasons.push(`Direct match in your PIN code (${p.pin_code})`);
+        } else if (p.city.toLowerCase() === req.city.toLowerCase()) {
+          score += 16;
+          reasons.push(`Operates locally in ${p.city}`);
+        } else {
+          score += 5;
+          reasons.push(`Regional support capacity`);
+        }
+
+        if (p.verification_status === "verified") {
+          score += 10;
+          reasons.push("Audited and verified organization");
+        }
+
+        if (p.availability_status === "available") {
+          score += 5;
+          reasons.push("Currently accepting intakes");
+        }
+
+        return {
+          provider: p,
+          match_score: Math.min(100, score),
+          rationale: reasons
+        };
+      });
+
+      scored.sort((a,b) => b.match_score - a.match_score);
+      return scored.slice(0, 3).map((m, i) => ({ ...m, rank: i + 1, is_best_match: i === 0 }));
+    }
+
+    // --- MAIN APP COMPONENT ---
+    function App() {
+      const [activePage, setActivePage] = useState('home');
+      const [providers, setProviders] = useState(INITIAL_PROVIDERS);
+      const [requests, setRequests] = useState(INITIAL_REQUESTS);
+      const [activeRequest, setActiveRequest] = useState(null);
+      const [trackingCode, setTrackingCode] = useState('MD-2026-EDU1');
+      const [selectedCategory, setSelectedCategory] = useState('all');
+      const [contactModalProvider, setContactModalProvider] = useState(null);
+
+      // Request Form State
+      const [form, setForm] = useState({
+        category: 'education',
+        title: '',
+        description: '',
+        city: '',
+        pin_code: '',
+        phone: '',
+        consent: false
+      });
+
+      // Handle Submit Request
+      const handleSubmitRequest = (e) => {
+        e.preventDefault();
+        if (!form.title || !form.description || !form.city || !form.phone || !form.consent) {
+          alert("Please fill in title, description, city, phone and check the consent box.");
+          return;
+        }
+
+        const code = "MD-2026-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+        const newReq = {
+          id: "req-" + Date.now(),
+          tracking_code: code,
+          category: form.category,
+          title: form.title,
+          description: form.description,
+          city: form.city,
+          pin_code: form.pin_code,
+          contact_phone_masked: form.phone.slice(0, 6) + " •••• " + form.phone.slice(-2),
+          status: "matched",
+          created_at: new Date().toISOString(),
+          timeline: [
+            {
+              update_title: "Request Registered & Matches Computed",
+              update_description: `Case initialized in ${form.city}. Smart matching completed.`,
+              created_at: new Date().toISOString()
+            }
+          ]
+        };
+
+        const matches = runMatching(newReq, providers);
+        newReq.matches = matches;
+
+        setRequests([newReq, ...requests]);
+        setActiveRequest(newReq);
+        setTrackingCode(code);
+        setActivePage('matching-results');
+      };
+
+      // Record Call Outcome
+      const handleSaveCallOutcome = (provider, outcome, notes) => {
+        if (!activeRequest) return;
+        
+        let newStatus = activeRequest.status;
+        let updateTitle = `Call to ${provider.name}`;
+        let updateDesc = `Outcome logged as: ${outcome.replace(/_/g, ' ')}. ${notes}`;
+
+        if (outcome === 'help_promised') {
+          newStatus = 'assistance_promised';
+          updateTitle = `Assistance Promised by ${provider.name}`;
+        } else if (outcome === 'provider_cannot_help' || outcome === 'number_unavailable') {
+          newStatus = 'unresolved';
+          updateTitle = `Smart Fallback Activated`;
+          updateDesc = `${provider.name} unable to assist. Recommending alternative verified partners.`;
+        } else {
+          newStatus = 'contact_attempted';
+        }
+
+        const updatedReq = {
+          ...activeRequest,
+          status: newStatus,
+          timeline: [
+            ...activeRequest.timeline,
+            {
+              update_title: updateTitle,
+              update_description: updateDesc,
+              created_at: new Date().toISOString()
+            }
+          ]
+        };
+
+        setActiveRequest(updatedReq);
+        setRequests(requests.map(r => r.id === updatedReq.id ? updatedReq : r));
+        setContactModalProvider(null);
+        alert(`Outcome recorded: ${outcome}. Case timeline updated!`);
+      };
+
+      // Confirm Resolution ("Yes, I received help")
+      const handleConfirmResolution = (reqId) => {
+        const req = requests.find(r => r.id === reqId) || activeRequest;
+        if (!req) return;
+
+        const updated = {
+          ...req,
+          status: 'resolved_by_user_confirmation',
+          timeline: [
+            ...req.timeline,
+            {
+              update_title: "Assistance Confirmed by Beneficiary",
+              update_description: "User verified that assistance was received. Case marked successfully resolved.",
+              created_at: new Date().toISOString()
+            }
+          ]
+        };
+
+        setRequests(requests.map(r => r.id === updated.id ? updated : r));
+        if (activeRequest && activeRequest.id === updated.id) setActiveRequest(updated);
+        alert("Thank you! Your case is now officially marked as resolved by beneficiary confirmation.");
+      };
+
+      // Still Need Help
+      const handleStillNeedHelp = (reqId) => {
+        const req = requests.find(r => r.id === reqId) || activeRequest;
+        if (!req) return;
+
+        const updated = {
+          ...req,
+          status: 'unresolved',
+          timeline: [
+            ...req.timeline,
+            {
+              update_title: "Continued Support Requested",
+              update_description: "Beneficiary stated assistance is still needed. Alternative providers remain active.",
+              created_at: new Date().toISOString()
+            }
+          ]
+        };
+
+        setRequests(requests.map(r => r.id === updated.id ? updated : r));
+        if (activeRequest && activeRequest.id === updated.id) setActiveRequest(updated);
+        alert("Your request remains active. Please contact the alternative providers listed below.");
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col">
+          
+          {/* HEADER / NAVBAR */}
+          <header className="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-gray-100">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+              
+              {/* Logo matching the Bharat Connect aesthetic */}
+              <div onClick={() => setActivePage('home')} className="flex items-center gap-2.5 cursor-pointer select-none">
+                <div className="w-10 h-10 rounded-full bg-orange-50 border border-orange-200 flex items-center justify-center text-[#ea580c] shadow-xs text-xl font-bold">
+                  🌐
+                </div>
+                <span className="text-2xl font-black tracking-tight">
+                  <span className="text-[#ea580c]">MADAD</span>{' '}
+                  <span className="text-[#16a34a]">Connect</span>
+                </span>
+              </div>
+
+              {/* Navigation links */}
+              <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-gray-600">
+                <button onClick={() => setActivePage('find-help')} className={`hover:text-[#ea580c] ${activePage === 'find-help' ? 'text-[#ea580c]' : ''}`}>
+                  Help Feed
+                </button>
+                <button onClick={() => setActivePage('request-help')} className={`hover:text-[#ea580c] ${activePage === 'request-help' ? 'text-[#ea580c]' : ''}`}>
+                  Ask for Help
+                </button>
+                <button onClick={() => setActivePage('give-help')} className={`hover:text-[#16a34a] ${activePage === 'give-help' ? 'text-[#16a34a]' : ''}`}>
+                  Offer Help
+                </button>
+                <button onClick={() => setActivePage('track-request')} className={`hover:text-[#1e3a8a] ${activePage === 'track-request' ? 'text-[#1e3a8a]' : ''}`}>
+                  Track Case
+                </button>
+                <button onClick={() => setActivePage('admin')} className={`hover:text-[#1e3a8a] ${activePage === 'admin' ? 'text-[#1e3a8a]' : ''}`}>
+                  Admin
+                </button>
+              </nav>
+
+              {/* Right Avatar */}
+              <div className="w-10 h-10 rounded-full border border-gray-200 bg-white shadow-xs flex items-center justify-center text-gray-700 cursor-pointer text-base">
+                👤
+              </div>
+
+            </div>
+          </header>
+
+          {/* MAIN VIEW ROUTING */}
+          <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+            
+            {/* 1. HOME PAGE */}
+            {activePage === 'home' && (
+              <div className="space-y-16">
+                
+                {/* Hero */}
+                <div className="text-center max-w-4xl mx-auto space-y-5 pt-8">
+                  <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200/80 px-4 py-1.5 rounded-full text-xs font-semibold text-[#ea580c] shadow-xs">
+                    <span>👋</span>
+                    <span>Community-run help network · 100% free · Zero ads · No spam</span>
+                  </div>
+
+                  <div className="flex items-center justify-center gap-3 select-none pt-1">
+                    <span className="text-3xl">🌐</span>
+                    <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900">
+                      <span className="text-[#ea580c]">MADAD</span>{' '}
+                      <span className="text-[#1e3a8a]">Connect</span>
+                    </h1>
+                  </div>
+
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight max-w-2xl mx-auto leading-snug">
+                    Real help from real people near you.
+                  </h2>
+
+                  <p className="text-slate-600 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
+                    Stuck with a tough situation? Tell us what you need in plain words. We connect you directly with verified local groups, community volunteers, and neighbours who actually pick up the phone.
+                  </p>
+
+                  <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+                    <button
+                      onClick={() => setActivePage('request-help')}
+                      className="bg-[#ea580c] hover:bg-[#d44a05] text-white px-8 py-3.5 rounded-xl font-bold text-sm shadow-md transition-all hover:scale-105 cursor-pointer"
+                    >
+                      🤝 Ask for Help
+                    </button>
+                    <button
+                      onClick={() => setActivePage('give-help')}
+                      className="bg-white hover:bg-green-50 border-2 border-[#16a34a] text-[#16a34a] px-8 py-3.5 rounded-xl font-bold text-sm shadow-sm transition-all hover:scale-105 cursor-pointer"
+                    >
+                      💚 I Want to Help
+                    </button>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-center gap-6 pt-3 text-xs text-slate-500 font-medium">
+                    <span className="flex items-center gap-1.5">
+                      🔒 Your phone stays strictly private
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      ⚡ No login or paperwork needed
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      🛡️ Backup contacts ready if someone's full
+                    </span>
+                  </div>
+                </div>
+
+                {/* How It Works (Conversational) */}
+                <div className="space-y-8 pt-4 text-center max-w-5xl mx-auto">
+                  <div>
+                    <div className="text-xs font-bold text-[#ea580c] uppercase tracking-wider">How it works</div>
+                    <h3 className="text-3xl font-extrabold text-slate-900 mt-1">No dead-ends. No unreturned calls.</h3>
+                    <p className="text-sm text-slate-500 mt-1">Traditional directories give you numbers and walk away. We stay with you until it's sorted.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-white p-7 rounded-3xl border border-slate-100 shadow-sm text-center space-y-3">
+                      <div className="w-12 h-12 rounded-2xl bg-orange-100/70 text-[#ea580c] font-black text-xl flex items-center justify-center mx-auto">
+                        1
+                      </div>
+                      <h4 className="font-bold text-slate-900 text-base">Speak or type your problem</h4>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Just write what happened in normal everyday language. No formal letters, income certificates, or complex proofs needed.
+                      </p>
+                    </div>
+
+                    <div className="bg-white p-7 rounded-3xl border border-slate-100 shadow-sm text-center space-y-3">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-100/70 text-[#16a34a] font-black text-xl flex items-center justify-center mx-auto">
+                        2
+                      </div>
+                      <h4 className="font-bold text-slate-900 text-base">We pair you with someone near you</h4>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        We look at your city, PIN code, and what you specifically need, then give you the best verified local contact plus 2 backup options.
+                      </p>
+                    </div>
+
+                    <div className="bg-white p-7 rounded-3xl border border-slate-100 shadow-sm text-center space-y-3">
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-100/70 text-[#4f46e5] font-black text-xl flex items-center justify-center mx-auto">
+                        3
+                      </div>
+                      <h4 className="font-bold text-slate-900 text-base">Closed only when you say so</h4>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Finding a contact isn't success. If someone can't help, our smart backup kicks in. Only your confirmation marks a case resolved.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 5 Core Categories */}
+                <div className="space-y-6 max-w-5xl mx-auto pt-4">
+                  <div className="text-center space-y-1">
+                    <div className="text-xs font-bold text-[#ea580c] uppercase tracking-wider">What we help with</div>
+                    <h3 className="text-2xl font-bold text-slate-900">Five assistance areas</h3>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    {[
+                      { id: 'education', title: 'School & College', icon: '📚', desc: 'NCERT books, stationery & fees' },
+                      { id: 'food_and_essentials', title: 'Food & Groceries', icon: '🍲', desc: 'Hot meals & monthly ration kits' },
+                      { id: 'medical_assistance', title: 'Medical Help', icon: '🏥', desc: 'Hospital OPD navigation & blood donors' },
+                      { id: 'shelter_and_support', title: 'Safe Shelter', icon: '🏠', desc: 'Overnight stay & winter bedding' },
+                      { id: 'community_support', title: 'Elder & Care', icon: '🤝', desc: 'Senior companionship & disability aids' }
+                    ].map(cat => (
+                      <div
+                        key={cat.id}
+                        onClick={() => { setSelectedCategory(cat.id); setActivePage('find-help'); }}
+                        className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs hover:border-[#ea580c] hover:shadow-md cursor-pointer transition-all text-center space-y-2"
+                      >
+                        <div className="text-3xl">{cat.icon}</div>
+                        <div className="font-bold text-slate-900 text-sm">{cat.title}</div>
+                        <p className="text-[11px] text-slate-500">{cat.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Recent Outcomes */}
+                <div className="space-y-6 max-w-5xl mx-auto pt-4">
+                  <div className="text-center space-y-1">
+                    <div className="text-xs font-bold text-[#16a34a] uppercase tracking-wider">Accountability in action</div>
+                    <h3 className="text-2xl font-bold text-slate-900">Real outcomes from this week</h3>
+                    <p className="text-xs text-slate-500">Every case below was verified resolved directly by the beneficiary.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-xs space-y-2.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <strong className="text-slate-800">Ramesh S.</strong>
+                        <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-bold">Janakpuri, Delhi</span>
+                      </div>
+                      <div className="text-xs text-slate-600">Needed: <strong>9th class NCERT books</strong></div>
+                      <div className="text-xs text-emerald-800 bg-emerald-50/60 p-2.5 rounded-xl border border-emerald-100">
+                        ✓ Received textbook kit from Shiksha Sahyog Foundation in 24 hours.
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-xs space-y-2.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <strong className="text-slate-800">Fatima B.</strong>
+                        <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-bold">Aminabad, Lucknow</span>
+                      </div>
+                      <div className="text-xs text-slate-600">Needed: <strong>2-week grocery ration kit</strong></div>
+                      <div className="text-xs text-emerald-800 bg-emerald-50/60 p-2.5 rounded-xl border border-emerald-100">
+                        ✓ Community kitchen dropped off flour, pulses & oil during medical crisis.
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-xs space-y-2.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <strong className="text-slate-800">Kailash P. (68 yrs)</strong>
+                        <span className="text-[10px] bg-rose-50 text-rose-700 px-2 py-0.5 rounded-full font-bold">Bapu Nagar, Jaipur</span>
+                      </div>
+                      <div className="text-xs text-slate-600">Needed: <strong>Hospital OPD paperwork escort</strong></div>
+                      <div className="text-xs text-emerald-800 bg-emerald-50/60 p-2.5 rounded-xl border border-emerald-100">
+                        ✓ Volunteer Amit accompanied him to hospital for his monthly eye checkup.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Founder's / Volunteer Note */}
+                <div className="max-w-3xl mx-auto bg-white p-8 rounded-3xl border border-orange-100 shadow-sm space-y-3 text-center">
+                  <div className="text-xs font-bold text-[#ea580c] uppercase tracking-wider">💬 Why we started MADAD</div>
+                  <p className="text-sm text-slate-700 italic leading-relaxed">
+                    "Finding a phone number on Google isn't help—getting someone to actually answer and resolve your problem is. MADAD was created by a student volunteer team so no genuine request gets lost in the noise."
+                  </p>
+                  <div className="text-xs font-semibold text-slate-500 pt-1">— Volunteer team at MADAD</div>
+                </div>
+                        <div className="text-3xl">{cat.icon}</div>
+                        <div className="font-bold text-gray-900 text-sm">{cat.title}</div>
+                        <p className="text-[11px] text-gray-500">{cat.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {/* 2. FIND HELP DIRECTORY */}
+            {activePage === 'find-help' && (
+              <div className="space-y-6 max-w-5xl mx-auto">
+                <div className="space-y-1">
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Verified Help Directory</h2>
+                  <p className="text-xs text-gray-500">Explore active, audited support resources across India.</p>
+                </div>
+
+                {/* Filter Pills */}
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {['all', 'education', 'food_and_essentials', 'medical_assistance', 'shelter_and_support', 'community_support'].map(c => (
+                    <button
+                      key={c}
+                      onClick={() => setSelectedCategory(c)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${
+                        selectedCategory === c ? 'bg-[#ea580c] text-white' : 'bg-white text-gray-600 border border-gray-200'
+                      }`}
+                    >
+                      {c.replace(/_/g, ' ')}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {providers
+                    .filter(p => selectedCategory === 'all' || p.categories.includes(selectedCategory))
+                    .map(p => (
+                      <div key={p.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between space-y-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                              ✓ Verified
+                            </span>
+                            <span className="text-[11px] text-gray-400">📍 {p.city}</span>
+                          </div>
+                          <h4 className="font-bold text-gray-900 text-base">{p.name}</h4>
+                          <p className="text-xs text-gray-500 leading-relaxed">{p.description}</p>
+                          <div className="text-[11px] text-gray-400">
+                            Eligibility: <strong className="text-gray-700">{p.eligibility_criteria}</strong>
+                          </div>
+                        </div>
+
+                        <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+                          <div className="text-xs font-bold text-gray-800">{p.phone}</div>
+                          <a
+                            href={`tel:${p.phone.replace(/\s+/g, '')}`}
+                            className="bg-[#ea580c] hover:bg-[#d44a05] text-white px-3.5 py-1.5 rounded-xl text-xs font-bold"
+                          >
+                            📞 Call Provider
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* 3. REQUEST HELP (ASK FOR HELP) */}
+            {activePage === 'request-help' && (
+              <div className="max-w-2xl mx-auto space-y-6">
+                <div>
+                  <h2 className="text-3xl font-extrabold text-gray-900">Explain Your Problem</h2>
+                  <p className="text-xs text-gray-500 mt-1">Every request deserves an answer. Submit your details below to get matched.</p>
+                </div>
+
+                <div className="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl text-xs text-amber-900">
+                  <strong>Medical Warning:</strong> For acute life-threatening emergencies, immediately dial <strong>112</strong> or <strong>108</strong>.
+                </div>
+
+                <form onSubmit={handleSubmitRequest} className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-100 shadow-md space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Assistance Category *</label>
+                    <select
+                      value={form.category}
+                      onChange={(e) => setForm({ ...form, category: e.target.value })}
+                      className="w-full text-xs p-3 rounded-xl border border-gray-200 bg-white"
+                    >
+                      <option value="education">Education (Books, Supplies, Tuition)</option>
+                      <option value="food_and_essentials">Food & Essentials (Meals, Rations)</option>
+                      <option value="medical_assistance">Medical Assistance (Non-emergency guidance)</option>
+                      <option value="shelter_and_support">Shelter & Basic Support</option>
+                      <option value="community_support">Community Care (Elders, Disability)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Summary of What You Need *</label>
+                    <input
+                      type="text"
+                      required
+                      value={form.title}
+                      onChange={(e) => setForm({ ...form, title: e.target.value })}
+                      placeholder="e.g. Need 8th class science & math NCERT books"
+                      className="w-full text-xs p-3 rounded-xl border border-gray-200"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Explain the Problem in Detail *</label>
+                    <textarea
+                      required
+                      rows="3"
+                      value={form.description}
+                      onChange={(e) => setForm({ ...form, description: e.target.value })}
+                      placeholder="Explain your situation so providers can understand how best to assist you."
+                      className="w-full text-xs p-3 rounded-xl border border-gray-200"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold uppercase text-gray-700 mb-1">City / District *</label>
+                      <input
+                        type="text"
+                        required
+                        value={form.city}
+                        onChange={(e) => setForm({ ...form, city: e.target.value })}
+                        placeholder="e.g. New Delhi"
+                        className="w-full text-xs p-3 rounded-xl border border-gray-200"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase text-gray-700 mb-1">PIN Code (Optional)</label>
+                      <input
+                        type="text"
+                        value={form.pin_code}
+                        onChange={(e) => setForm({ ...form, pin_code: e.target.value })}
+                        placeholder="e.g. 110058"
+                        className="w-full text-xs p-3 rounded-xl border border-gray-200"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Contact Phone Number *</label>
+                    <input
+                      type="tel"
+                      required
+                      value={form.phone}
+                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                      placeholder="+91 98765 43210"
+                      className="w-full text-xs p-3 rounded-xl border border-gray-200"
+                    />
+                    <span className="text-[10px] text-gray-400">Protected by privacy guard: never shown publicly.</span>
+                  </div>
+
+                  <div className="pt-2">
+                    <label className="flex items-start gap-2 text-xs text-gray-600 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={form.consent}
+                        onChange={(e) => setForm({ ...form, consent: e.target.checked })}
+                        className="mt-0.5 rounded text-[#ea580c]"
+                      />
+                      <span>I consent to share these details strictly with matching verified providers for help discovery.</span>
+                    </label>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-[#ea580c] hover:bg-[#d44a05] text-white py-3.5 rounded-xl font-bold text-xs shadow-md transition-all cursor-pointer"
+                  >
+                    Submit & Compute Matches →
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {/* 4. MATCHING RESULTS PAGE */}
+            {activePage === 'matching-results' && activeRequest && (
+              <div className="max-w-4xl mx-auto space-y-8">
+                
+                {/* Header Banner */}
+                <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">Request Registered Successfully</span>
+                    <h2 className="text-2xl font-bold text-gray-900 mt-0.5">{activeRequest.title}</h2>
+                    <p className="text-xs text-gray-600">Location: {activeRequest.city}</p>
+                  </div>
+
+                  <div className="bg-white p-3 rounded-xl border border-gray-200 text-center shrink-0">
+                    <div className="text-[10px] font-bold text-gray-400 uppercase">Tracking ID</div>
+                    <div className="text-lg font-black text-[#ea580c]">{activeRequest.tracking_code}</div>
+                  </div>
+                </div>
+
+                {/* Best Match */}
+                {activeRequest.matches && activeRequest.matches[0] && (
+                  <div className="bg-white rounded-3xl border-2 border-[#16a34a] p-6 shadow-md space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="bg-[#16a34a] text-white text-[11px] font-bold px-3 py-1 rounded-full">
+                        ★ Best Recommended Match ({activeRequest.matches[0].match_score}% Score)
+                      </span>
+                      <span className="text-xs text-emerald-700 font-bold">✓ Verified Partner</span>
+                    </div>
+
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900">{activeRequest.matches[0].provider.name}</h3>
+                      <p className="text-xs text-gray-600 mt-1 leading-relaxed">{activeRequest.matches[0].provider.description}</p>
+                    </div>
+
+                    <div className="bg-gray-50 p-3.5 rounded-xl text-xs text-gray-600 space-y-1 border border-gray-100">
+                      <strong>Why this provider matches your request:</strong>
+                      <ul className="list-disc pl-5 text-[11px] space-y-0.5 text-gray-500">
+                        {activeRequest.matches[0].rationale.map((r, idx) => (
+                          <li key={idx}>{r}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="pt-2 flex items-center justify-between">
+                      <span className="text-xs font-bold text-gray-800">{activeRequest.matches[0].provider.phone}</span>
+                      <button
+                        onClick={() => setContactModalProvider(activeRequest.matches[0].provider)}
+                        className="bg-[#16a34a] hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-sm cursor-pointer"
+                      >
+                        📞 Call Provider
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Alternative Backup Providers */}
+                {activeRequest.matches && activeRequest.matches.slice(1).length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-bold text-gray-800">Verified Alternatives (Smart Fallback Queue)</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {activeRequest.matches.slice(1).map((m, idx) => (
+                        <div key={idx} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between space-y-3">
+                          <div>
+                            <div className="text-[10px] font-bold text-[#ea580c] uppercase">Backup Alternative #{idx + 1}</div>
+                            <h5 className="font-bold text-gray-900 text-sm mt-0.5">{m.provider.name}</h5>
+                            <p className="text-xs text-gray-500 mt-1 line-clamp-2">{m.provider.description}</p>
+                          </div>
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <span className="text-xs text-gray-700 font-semibold">{m.provider.phone}</span>
+                            <button
+                              onClick={() => setContactModalProvider(m.provider)}
+                              className="text-xs font-bold text-[#ea580c] hover:underline"
+                            >
+                              Call Alternative →
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="text-center pt-4">
+                  <button
+                    onClick={() => { setTrackingCode(activeRequest.tracking_code); setActivePage('track-request'); }}
+                    className="bg-gray-900 hover:bg-black text-white px-6 py-2.5 rounded-xl text-xs font-bold"
+                  >
+                    Go to Full Case Tracking Timeline →
+                  </button>
+                </div>
+
+              </div>
+            )}
+
+            {/* 5. GIVE HELP (VOLUNTEER FEED) */}
+            {activePage === 'give-help' && (
+              <div className="max-w-4xl mx-auto space-y-6">
+                <div>
+                  <h2 className="text-3xl font-extrabold text-gray-900">Offer Help as Volunteer</h2>
+                  <p className="text-xs text-gray-500 mt-1">Browse open community requests. Beneficiary phone numbers are masked for dignity and privacy.</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {requests.filter(r => r.status !== 'resolved_by_user_confirmation').map(r => (
+                    <div key={r.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between space-y-3">
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#ea580c] bg-orange-50 px-2 py-0.5 rounded">
+                          {r.category.replace(/_/g, ' ')}
+                        </span>
+                        <h4 className="font-bold text-gray-900 text-base">{r.title}</h4>
+                        <p className="text-xs text-gray-500 leading-relaxed">{r.description}</p>
+                        <div className="text-[11px] text-gray-400 pt-1">
+                          📍 {r.city} · Tracking: <strong className="text-gray-700">{r.tracking_code}</strong>
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t border-gray-100">
+                        <button
+                          onClick={() => alert(`Assistance offer recorded for case ${r.tracking_code}. Thank you for volunteering!`)}
+                          className="w-full bg-[#16a34a] hover:bg-emerald-700 text-white py-2 rounded-xl text-xs font-bold"
+                        >
+                          💚 Offer Assistance
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 6. TRACK CASE TIMELINE & CONFIRMED RESOLUTION */}
+            {activePage === 'track-request' && (
+              <div className="max-w-3xl mx-auto space-y-6">
+                <div>
+                  <h2 className="text-3xl font-extrabold text-gray-900">Track Case Journey</h2>
+                  <p className="text-xs text-gray-500 mt-1">Follow every event from submission to user-confirmed resolution.</p>
+                </div>
+
+                {/* Search tracking code */}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={trackingCode}
+                    onChange={(e) => setTrackingCode(e.target.value.toUpperCase())}
+                    placeholder="Enter Tracking ID (e.g. MD-2026-EDU1)"
+                    className="flex-1 text-xs p-3 rounded-xl border border-gray-200 uppercase font-mono"
+                  />
+                  <button
+                    onClick={() => {
+                      const found = requests.find(r => r.tracking_code === trackingCode);
+                      if (found) setActiveRequest(found);
+                      else alert(`No case found with tracking ID: ${trackingCode}`);
+                    }}
+                    className="bg-[#ea580c] text-white px-5 py-2.5 rounded-xl font-bold text-xs"
+                  >
+                    Search Case
+                  </button>
+                </div>
+
+                {(() => {
+                  const currentCase = requests.find(r => r.tracking_code === trackingCode) || activeRequest || requests[0];
+                  if (!currentCase) return null;
+
+                  return (
+                    <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-100 shadow-md space-y-6">
+                      
+                      {/* Status header */}
+                      <div className="flex items-start justify-between border-b border-gray-100 pb-4">
+                        <div>
+                          <div className="text-[11px] font-mono text-gray-400">ID: {currentCase.tracking_code}</div>
+                          <h3 className="text-xl font-bold text-gray-900 mt-0.5">{currentCase.title}</h3>
+                          <div className="text-xs text-gray-500 mt-0.5">{currentCase.city} · {currentCase.category}</div>
+                        </div>
+
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                          currentCase.status === 'resolved_by_user_confirmation'
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                            : 'bg-amber-50 text-amber-800 border-amber-200'
+                        }`}>
+                          {currentCase.status === 'resolved_by_user_confirmation' ? '★ Confirmed Resolved' : currentCase.status.replace(/_/g, ' ')}
+                        </span>
+                      </div>
+
+                      {/* CORE PRINCIPLE RESOLUTION BUTTONS */}
+                      {currentCase.status !== 'resolved_by_user_confirmation' ? (
+                        <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-2">
+                          <div className="text-xs font-bold text-gray-800">
+                            Have you received the assistance you required?
+                          </div>
+                          <div className="flex flex-wrap gap-3">
+                            <button
+                              onClick={() => handleConfirmResolution(currentCase.id)}
+                              className="bg-[#16a34a] hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-xs cursor-pointer"
+                            >
+                              ✓ Yes, I received help
+                            </button>
+                            <button
+                              onClick={() => handleStillNeedHelp(currentCase.id)}
+                              className="bg-white hover:bg-gray-100 text-rose-700 border border-rose-200 px-5 py-2 rounded-xl text-xs font-bold cursor-pointer"
+                            >
+                              ✕ No, I still need help
+                            </button>
+                          </div>
+                          <p className="text-[10px] text-gray-500">
+                            Only your explicit confirmation marks this case resolved. We never close cases automatically.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-xs text-emerald-800 font-semibold">
+                          ★ Case successfully resolved by beneficiary confirmation!
+                        </div>
+                      )}
+
+                      {/* Timeline */}
+                      <div className="space-y-4 pt-2">
+                        <h4 className="text-sm font-bold text-gray-800">Case Event Timeline</h4>
+                        <div className="border-l-2 border-gray-200 pl-4 space-y-4">
+                          {(currentCase.timeline || []).map((t, idx) => (
+                            <div key={idx} className="relative">
+                              <span className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-[#ea580c]"></span>
+                              <div className="text-[10px] text-gray-400">{new Date(t.created_at).toLocaleString()}</div>
+                              <div className="text-xs font-bold text-gray-800 mt-0.5">{t.update_title}</div>
+                              <div className="text-xs text-gray-500 mt-0.5">{t.update_description}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* 7. ADMIN DASHBOARD */}
+            {activePage === 'admin' && (
+              <div className="max-w-4xl mx-auto space-y-6">
+                <div>
+                  <h2 className="text-3xl font-extrabold text-gray-900">Admin Governance Dashboard</h2>
+                  <p className="text-xs text-gray-500 mt-1">Real-time database records and provider verification queue.</p>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
+                    <div className="text-xs text-gray-400 font-bold uppercase">Total Cases</div>
+                    <div className="text-2xl font-black text-gray-900 mt-1">{requests.length}</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
+                    <div className="text-xs text-gray-400 font-bold uppercase">In Progress</div>
+                    <div className="text-2xl font-black text-amber-600 mt-1">
+                      {requests.filter(r => r.status !== 'resolved_by_user_confirmation').length}
+                    </div>
+                  </div>
+                  <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 shadow-sm text-center">
+                    <div className="text-xs text-emerald-800 font-bold uppercase">User Confirmed ★</div>
+                    <div className="text-2xl font-black text-emerald-700 mt-1">
+                      {requests.filter(r => r.status === 'resolved_by_user_confirmation').length}
+                    </div>
+                  </div>
+                  <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
+                    <div className="text-xs text-gray-400 font-bold uppercase">Verified NGOs</div>
+                    <div className="text-2xl font-black text-[#ea580c] mt-1">{providers.length}</div>
+                  </div>
+                </div>
+
+                {/* Verification Queue */}
+                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+                  <h4 className="text-sm font-bold text-gray-800">Provider Audit Queue</h4>
+                  <div className="space-y-3">
+                    {providers.map(p => (
+                      <div key={p.id} className="p-3.5 rounded-xl border border-gray-100 flex items-center justify-between text-xs">
+                        <div>
+                          <strong className="text-gray-900">{p.name}</strong> ({p.city})
+                          <div className="text-[11px] text-gray-400">{p.categories.join(', ')}</div>
+                        </div>
+                        <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                          Verified
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+          </main>
+
+          {/* CONTACT CALL MODAL */}
+          {contactModalProvider && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
+              <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 space-y-4">
+                <div className="flex items-start justify-between border-b pb-3">
+                  <div>
+                    <span className="text-[10px] font-bold text-[#ea580c] uppercase">Direct Call & Tracking</span>
+                    <h3 className="text-lg font-bold text-gray-900">{contactModalProvider.name}</h3>
+                  </div>
+                  <button onClick={() => setContactModalProvider(null)} className="text-gray-400 hover:text-gray-700">✕</button>
+                </div>
+
+                <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs">
+                  <div>Phone: <strong>{contactModalProvider.phone}</strong></div>
+                  <a
+                    href={`tel:${contactModalProvider.phone.replace(/\s+/g, '')}`}
+                    className="mt-2 inline-block bg-[#16a34a] text-white px-4 py-1.5 rounded-lg text-xs font-bold"
+                  >
+                    📞 Open Phone Dialer
+                  </a>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-800 mb-2">What happened on the call?</label>
+                  <div className="space-y-1.5 text-xs">
+                    {[
+                      { id: 'connected', label: 'Connected / Spoke with staff' },
+                      { id: 'help_promised', label: 'Help Promised (Pending delivery)' },
+                      { id: 'provider_cannot_help', label: 'Cannot Help (Activate Smart Fallback)' },
+                      { id: 'no_answer', label: 'No Answer / Line Busy' }
+                    ].map(opt => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => handleSaveCallOutcome(contactModalProvider, opt.id, "Logged via web UI.")}
+                        className="w-full text-left p-2.5 rounded-xl border border-gray-200 hover:bg-orange-50 hover:border-[#ea580c] transition-colors"
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* FOOTER */}
+          <footer className="bg-[#0f172a] text-white py-10 border-t border-gray-800 mt-20">
+            <div className="max-w-7xl mx-auto px-4 text-center space-y-3 text-xs text-gray-400">
+              <div className="font-bold text-white text-base">MADAD Connect</div>
+              <p>You explain your problem. MADAD finds the way forward.</p>
+              <p className="text-[11px] text-gray-500">"Finding a provider is not success. Resolving the person's problem is success."</p>
+              <div className="pt-4 text-[10px]">© 2026 MADAD Connect. Built with dignity and purpose.</div>
+            </div>
+          </footer>
+
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

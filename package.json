@@ -1,0 +1,19 @@
+{
+  "name": "madad-platform",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "MADAD - National Social Impact Help-Discovery & Resolution Platform",
+  "private": true,
+  "scripts": {
+    "start": "node server/src/index.js",
+    "dev": "node run_all.js",
+    "test": "node server/test_runner.js",
+    "build": "npm --prefix client install && npm --prefix client run build && npm --prefix server install",
+    "build:client": "npm --prefix client run build",
+    "install:all": "npm install && npm --prefix client install && npm --prefix server install",
+    "server": "npm --prefix server start",
+    "client": "npm --prefix client run dev"
+  },
+  "author": "MADAD Platform Team",
+  "license": "MIT"
+}
