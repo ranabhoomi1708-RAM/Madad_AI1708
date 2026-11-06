@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Eye, EyeOff, KeyRound, Mail, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
@@ -22,92 +23,193 @@ function ForgotPassword({ setActivePage }) {
   const [resetToken, setResetToken] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [msg, setMsg] = useState(null);
 
   const handleRequestReset = async (e) => {
     e.preventDefault();
-    setError(null); setLoading(true);
+    setError(null);
+    setLoading(true);
     try {
       const res = await authForgotPassword(email.trim());
       if (res.success) {
         setResetToken(res.data.resetToken);
         setStep('reset');
-        setMsg('Reset token generated. Enter your new password below.');
+        setMsg('Verification reset token generated! Enter your new password below.');
       } else {
-        setError(res.error?.message || 'Request failed');
+        setError(res.error?.message || 'Password reset request failed.');
       }
-    } catch { setError('Network error'); }
+    } catch {
+      setError('Unable to connect to server. Please try again.');
+    }
     setLoading(false);
   };
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setError(null);
-    if (newPassword.length < 6) { setError('Password must be at least 6 characters'); return; }
-    if (newPassword !== confirmPassword) { setError('Passwords do not match'); return; }
+    if (newPassword.length < 6) {
+      setError('New password must be at least 6 characters long.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match. Please re-enter.');
+      return;
+    }
     setLoading(true);
     try {
       const res = await authResetPassword(email.trim(), resetToken, newPassword);
       if (res.success) {
         setStep('done');
-        setMsg('Password reset successful! You can now log in.');
+        setMsg('Your password has been successfully reset! You can now log in.');
       } else {
-        setError(res.error?.message || 'Reset failed');
+        setError(res.error?.message || 'Password reset failed. Invalid or expired token.');
       }
-    } catch { setError('Network error'); }
+    } catch {
+      setError('Unable to connect to server. Please try again.');
+    }
     setLoading(false);
   };
 
   return (
     <div className="max-w-md mx-auto px-4 py-12 space-y-6">
-      <h1 className="text-2xl font-extrabold text-slate-900">Reset Your Password</h1>
+      <div className="text-center space-y-2">
+        <div className="w-12 h-12 bg-orange-50 border border-orange-200 rounded-2xl flex items-center justify-center text-[#ea580c] mx-auto">
+          <KeyRound className="w-6 h-6 stroke-[2]" />
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">Reset Password</h1>
+        <p className="text-xs text-slate-500 max-w-xs mx-auto">
+          {step === 'email' && "Enter your registered email and we'll help you regain access."}
+          {step === 'reset' && "Choose a secure new password for your account."}
+          {step === 'done' && "Account recovered successfully."}
+        </p>
+      </div>
 
-      {error && <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-sm">{error}</div>}
-      {msg && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-3 rounded-xl text-sm">{msg}</div>}
-
-      {step === 'email' && (
-        <form onSubmit={handleRequestReset} className="space-y-4">
-          <label className="block text-xs font-bold uppercase text-slate-700">Email Address</label>
-          <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
-            className="w-full p-3 rounded-xl border border-slate-200 text-sm" placeholder="your@email.com" />
-          <button type="submit" disabled={loading}
-            className="w-full bg-[#ea580c] text-white py-3 rounded-xl font-bold text-sm disabled:opacity-50">
-            {loading ? 'Sending...' : 'Send Reset Token'}
-          </button>
-        </form>
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 p-3.5 rounded-2xl text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+          <span>{error}</span>
+        </div>
       )}
 
-      {step === 'reset' && (
-        <form onSubmit={handleResetPassword} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold uppercase text-slate-700">New Password</label>
-            <input type="password" required value={newPassword} onChange={e => setNewPassword(e.target.value)}
-              className="w-full p-3 rounded-xl border border-slate-200 text-sm" placeholder="Min 6 characters" />
-          </div>
-          <div>
-            <label className="block text-xs font-bold uppercase text-slate-700">Confirm Password</label>
-            <input type="password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-              className="w-full p-3 rounded-xl border border-slate-200 text-sm" />
-          </div>
-          <button type="submit" disabled={loading}
-            className="w-full bg-[#ea580c] text-white py-3 rounded-xl font-bold text-sm disabled:opacity-50">
-            {loading ? 'Resetting...' : 'Reset Password'}
-          </button>
-        </form>
+      {msg && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-3.5 rounded-2xl text-xs flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+          <span>{msg}</span>
+        </div>
       )}
 
-      {step === 'done' && (
-        <button onClick={() => setActivePage('login')}
-          className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold text-sm">
-          Go to Login
+      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-md">
+        {step === 'email' && (
+          <form onSubmit={handleRequestReset} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                Your Email Address *
+              </label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="w-full text-xs p-3.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#ea580c]/20 focus:border-[#ea580c]"
+                placeholder="your-email@example.com"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[#ea580c] hover:bg-[#d44a05] text-white py-3.5 rounded-xl font-bold text-xs shadow-md transition-all cursor-pointer disabled:opacity-50"
+            >
+              {loading ? 'Sending Request...' : 'Generate Reset Token'}
+            </button>
+          </form>
+        )}
+
+        {step === 'reset' && (
+          <form onSubmit={handleResetPassword} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                New Password *
+              </label>
+              <div className="relative">
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  required
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  className="w-full text-xs p-3.5 pr-11 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#ea580c]/20 focus:border-[#ea580c]"
+                  placeholder="Min 6 characters"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  aria-label={showNewPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                >
+                  {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                Confirm New Password *
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  required
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  className="w-full text-xs p-3.5 pr-11 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#ea580c]/20 focus:border-[#ea580c]"
+                  placeholder="Repeat new password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[#ea580c] hover:bg-[#d44a05] text-white py-3.5 rounded-xl font-bold text-xs shadow-md transition-all cursor-pointer disabled:opacity-50"
+            >
+              {loading ? 'Updating Password...' : 'Save New Password'}
+            </button>
+          </form>
+        )}
+
+        {step === 'done' && (
+          <div className="space-y-4 text-center">
+            <p className="text-xs text-slate-600">Your password was changed. You can now log into your MADAD account.</p>
+            <button
+              onClick={() => setActivePage('login')}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-xl font-bold text-xs shadow-md transition-all cursor-pointer"
+            >
+              Go to Sign In
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="text-center">
+        <button
+          onClick={() => setActivePage('login')}
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-[#ea580c] font-semibold cursor-pointer transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back to Sign In</span>
         </button>
-      )}
-
-      <button onClick={() => setActivePage('login')} className="text-sm text-slate-500 hover:text-[#ea580c]">
-        ← Back to Login
-      </button>
+      </div>
     </div>
   );
 }

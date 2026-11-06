@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { User, Lock, Mail, MapPin, ShieldCheck, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { User, Lock, Mail, MapPin, ShieldCheck, ArrowRight, CheckCircle2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { authLogin, authRegister } from '../services/api';
 
 export default function LoginSignup({ user, setUser, setActivePage }) {
   const [mode, setMode] = useState('signin'); // 'signin' or 'signup'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState('beneficiary');
   const [city, setCity] = useState('');
@@ -27,6 +30,17 @@ export default function LoginSignup({ user, setUser, setActivePage }) {
           setLoading(false);
           return;
         }
+        if (password.length < 6) {
+          setError('Password must be at least 6 characters long');
+          setLoading(false);
+          return;
+        }
+        if (password !== confirmPassword) {
+          setError('Passwords do not match. Please re-enter your password.');
+          setLoading(false);
+          return;
+        }
+
         const res = await authRegister({
           email: email.trim(),
           password,
@@ -39,19 +53,24 @@ export default function LoginSignup({ user, setUser, setActivePage }) {
         if (res.success) {
           const authUser = res.data.user;
           setUser(authUser);
-          try { localStorage.setItem('madad_user', JSON.stringify(authUser)); } catch (e) {}
+          try {
+            if (res.data.token) localStorage.setItem('madad_token', res.data.token);
+            localStorage.setItem('madad_user', JSON.stringify(authUser));
+          } catch (e) {}
           setSuccessMsg(`Welcome to MADAD, ${authUser.full_name}! Redirecting...`);
           setTimeout(() => setActivePage('home'), 1000);
         } else {
           setError(res.error?.message || 'Registration failed. Please try again.');
         }
       } else {
-        // Sign in with ANY email and password
         const res = await authLogin(email.trim(), password);
         if (res.success) {
           const authUser = res.data.user;
           setUser(authUser);
-          try { localStorage.setItem('madad_user', JSON.stringify(authUser)); } catch (e) {}
+          try {
+            if (res.data.token) localStorage.setItem('madad_token', res.data.token);
+            localStorage.setItem('madad_user', JSON.stringify(authUser));
+          } catch (e) {}
           setSuccessMsg(`Welcome back, ${authUser.full_name}! Redirecting...`);
           setTimeout(() => setActivePage('home'), 1000);
         } else {
@@ -59,7 +78,7 @@ export default function LoginSignup({ user, setUser, setActivePage }) {
         }
       }
     } catch (err) {
-      // Resilient local authentication fallback for any email
+      // Resilient local authentication fallback
       const fallbackName = fullName.trim() || email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1);
       const fallbackUser = {
         id: "user-" + Date.now(),
@@ -106,8 +125,8 @@ export default function LoginSignup({ user, setUser, setActivePage }) {
         </h1>
         <p className="text-sm text-slate-500 max-w-sm mx-auto">
           {mode === 'signup'
-            ? "Create an account in 30 seconds. Any email address works."
-            : "Sign in with your email and password to track cases or volunteer."}
+            ? "Create an account in 30 seconds to request assistance or volunteer."
+            : "Sign in with your email and password to track cases or offer support."}
         </p>
       </div>
 
@@ -116,7 +135,7 @@ export default function LoginSignup({ user, setUser, setActivePage }) {
         <button
           type="button"
           onClick={() => { setMode('signin'); setError(null); setSuccessMsg(null); }}
-          className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${
+          className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
             mode === 'signin'
               ? 'bg-white text-slate-900 shadow-sm'
               : 'text-slate-500 hover:text-slate-800'
@@ -127,7 +146,7 @@ export default function LoginSignup({ user, setUser, setActivePage }) {
         <button
           type="button"
           onClick={() => { setMode('signup'); setError(null); setSuccessMsg(null); }}
-          className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${
+          className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
             mode === 'signup'
               ? 'bg-white text-slate-900 shadow-sm'
               : 'text-slate-500 hover:text-slate-800'
@@ -226,10 +245,9 @@ export default function LoginSignup({ user, setUser, setActivePage }) {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="any-email@gmail.com"
+            placeholder="your-email@example.com"
             className="w-full text-xs p-3.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#ea580c]/20 focus:border-[#ea580c]"
           />
-          <span className="text-[10px] text-slate-400">You can use ANY email address to sign in or register.</span>
         </div>
 
         <div>
@@ -238,18 +256,61 @@ export default function LoginSignup({ user, setUser, setActivePage }) {
               Password *
             </label>
             {mode === 'signin' && (
-              <span className="text-[11px] text-slate-400">Any password accepted</span>
+              <button
+                type="button"
+                onClick={() => setActivePage('forgot-password')}
+                className="text-xs text-[#ea580c] hover:text-[#d44a05] font-semibold hover:underline cursor-pointer transition-colors"
+              >
+                Forgot Password?
+              </button>
             )}
           </div>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            className="w-full text-xs p-3.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#ea580c]/20 focus:border-[#ea580c]"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full text-xs p-3.5 pr-11 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#ea580c]/20 focus:border-[#ea580c]"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700 rounded-lg transition-colors cursor-pointer"
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
         </div>
+
+        {mode === 'signup' && (
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+              Confirm Password *
+            </label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full text-xs p-3.5 pr-11 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#ea580c]/20 focus:border-[#ea580c]"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700 rounded-lg transition-colors cursor-pointer"
+              >
+                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            <span className="text-[10px] text-slate-400">Must be at least 6 characters and match above.</span>
+          </div>
+        )}
 
         <button
           type="submit"
@@ -263,6 +324,18 @@ export default function LoginSignup({ user, setUser, setActivePage }) {
             </>
           )}
         </button>
+
+        {mode === 'signin' && (
+          <div className="text-center pt-1">
+            <button
+              type="button"
+              onClick={() => setActivePage('forgot-password')}
+              className="text-xs text-slate-500 hover:text-[#ea580c] cursor-pointer"
+            >
+              Trouble logging in? <span className="font-semibold text-[#ea580c] hover:underline">Reset your password here</span>
+            </button>
+          </div>
+        )}
 
       </form>
 

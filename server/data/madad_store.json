@@ -23,70 +23,92 @@
       "full_name": "Anita Deshmukh",
       "city": "Mumbai",
       "state": "Maharashtra"
+    },
+    {
+      "id": "user-1793802593268",
+      "email": "testuser_1793802593052@example.com",
+      "role": "beneficiary",
+      "full_name": "Test Beneficiary",
+      "city": "New Delhi",
+      "state": "Delhi",
+      "password_hash": "$2b$10$VdhyOHhNUcT2c5eKZgaXQ.wiVqEdCnsrWxM6tnM5YL4XXQbz81GEW",
+      "reset_token": null,
+      "reset_expires": null
+    },
+    {
+      "id": "user-1793802714181",
+      "email": "ranabhoomi1708@gmail.com",
+      "role": "beneficiary",
+      "full_name": "Bhoomi rana",
+      "city": "Greater Noida",
+      "state": "Delhi",
+      "password_hash": "$2b$10$Gu1ZcACi7xlw0ttsHOOE0uYqy0sIFSV6jyx76aZE33vK9J/7.uSDO",
+      "reset_token": null,
+      "reset_expires": null
     }
   ],
   "requests": [
     {
-      "id": "req-1793796775160",
-      "tracking_code": "MD-2026-I4IKO",
-      "beneficiary_id": "guest-1793796775160",
-      "beneficiary_name": "Beneficiary",
-      "category": "food_and_essentials",
-      "title": "Dry ration kit needed",
-      "description": "Temporary wage loss in Lucknow",
-      "city": "Lucknow",
-      "state": "State",
-      "pin_code": "",
-      "urgency": "standard",
-      "assistance_type": "General Support",
+      "id": "req-1793802593395",
+      "tracking_code": "MD-2026-64STN",
+      "beneficiary_id": "user-1793802593268",
+      "beneficiary_name": "Test Beneficiary",
+      "category": "education",
+      "title": "Textbooks needed for class 10 student",
+      "description": "Urgent requirement for science and math textbooks in Janakpuri.",
+      "city": "New Delhi",
+      "state": "Delhi",
+      "pin_code": "110058",
+      "urgency": "urgent",
+      "assistance_type": "Books & Study Materials",
       "preferred_contact_method": "phone",
-      "contact_phone": "+91 94151 22334",
-      "contact_phone_masked": "+91 94 •••• 34",
-      "status": "assistance_offered",
+      "contact_phone": "+91 98112 23344",
+      "contact_phone_masked": "+91 98 •••• 44",
+      "status": "matched",
       "voice_note_url": null,
       "consent_given": true,
-      "created_at": "2026-11-04T12:52:55.160Z",
-      "updated_at": "2026-11-04T12:52:55.164Z",
+      "created_at": "2026-11-04T14:29:53.395Z",
+      "updated_at": "2026-11-04T14:29:53.395Z",
       "matches": [
         {
           "provider": {
-            "id": "p-food-01",
-            "name": "Aahar Sewa Community Kitchen",
-            "description": "Daily cooked hot meals and weekly dry grocery rations for daily wage workers and destitute families.",
+            "id": "p-edu-01",
+            "name": "Shiksha Sahyog Foundation",
+            "description": "Provides free textbooks, school stationery kits, and remedial tutoring support for primary and secondary government school students.",
             "categories": [
-              "food_and_essentials"
+              "education"
             ],
-            "phone": "+91 94150 12345",
-            "email": "kitchen@aahar-sewa.in",
-            "website": "https://aahar-sewa.in",
-            "address": "Near Charbagh Railway Station, Aminabad Road",
-            "city": "Lucknow",
-            "state": "Uttar Pradesh",
-            "pin_code": "226004",
+            "phone": "+91 98112 34567",
+            "email": "contact@shikshasahyog.org",
+            "website": "https://shikshasahyog.org",
+            "address": "Block B-4, Near Community Center, Janakpuri",
+            "city": "New Delhi",
+            "state": "Delhi",
+            "pin_code": "110058",
             "service_areas": [
-              "Lucknow",
-              "Charbagh",
-              "Aminabad",
-              "Alambagh"
+              "New Delhi",
+              "West Delhi",
+              "Dwarka"
             ],
-            "eligibility_criteria": "Families without regular income, homeless persons, and emergency food crisis cases.",
+            "eligibility_criteria": "Enrolled in class 1-10 in government or aided schools with family income below ₹2.5L/year.",
             "assistance_types": [
-              "Cooked Meals",
-              "Grocery Rations",
-              "Daily Necessities"
+              "Books & Notebooks",
+              "School Supplies",
+              "Study Materials",
+              "Tutoring"
             ],
             "verification_status": "verified",
             "availability_status": "available",
-            "verification_notes": "Kitchen hygiene inspected by local food safety volunteer; on-site operations verified.",
-            "total_contact_attempts": 65,
-            "successful_resolutions": 61
+            "verification_notes": "Physical address verified and 80G registration documentation audited.",
+            "total_contact_attempts": 42,
+            "successful_resolutions": 38
           },
-          "match_score": 83,
+          "match_score": 100,
           "relevance_level": "High Relevance",
           "rationale": [
-            "Direct category match in Food & Essentials.",
-            "Offers relevant support matching your request keywords: \"dry\", \"wage\".",
-            "Operates locally within your city (Lucknow) and active service area.",
+            "Direct category match in Education.",
+            "Offers relevant support matching your request keywords: \"textbooks\", \"for\", \"and\", \"books\".",
+            "Located directly in your PIN code (110058).",
             "Formally verified organisation with audited registration.",
             "Currently active and accepting direct assistance requests."
           ],
@@ -96,91 +118,92 @@
         },
         {
           "provider": {
-            "id": "p-food-02",
-            "name": "Bengaluru Annapoorna Collective",
-            "description": "Emergency grocery kits (rice, pulses, oil, flour) delivered to distressed urban households.",
+            "id": "p-edu-02",
+            "name": "Vidya Deep Trust",
+            "description": "Higher secondary and vocational scholarship guidance, pre-matric coaching, and educational mentorship.",
             "categories": [
-              "food_and_essentials"
+              "education"
             ],
-            "phone": "+91 80223 98765",
-            "email": "help@annapoorna-blr.org",
-            "website": "https://annapoorna-blr.org",
-            "address": "14th Cross, Wilson Garden",
-            "city": "Bengaluru",
-            "state": "Karnataka",
-            "pin_code": "560027",
+            "phone": "+91 98200 45678",
+            "email": "support@vidyadeep.org",
+            "website": "https://vidyadeep.org",
+            "address": "Plot 12, Senapati Bapat Marg, Dadar West",
+            "city": "Mumbai",
+            "state": "Maharashtra",
+            "pin_code": "400028",
             "service_areas": [
-              "Bengaluru",
-              "South Bengaluru",
-              "Central Bengaluru"
+              "Mumbai",
+              "Thane",
+              "Navi Mumbai"
             ],
-            "eligibility_criteria": "Immediate food emergency or stranded migrant workers with no ration card access.",
+            "eligibility_criteria": "Students appearing for 10th or 12th board exams needing tuition or exam fee assistance.",
             "assistance_types": [
-              "Dry Ration Kits",
-              "Emergency Food Aid"
+              "Tuition Assistance",
+              "Scholarship Guidance",
+              "Study Materials"
             ],
             "verification_status": "verified",
-            "availability_status": "limited",
-            "verification_notes": "Volunteer network operational. Verified via city civil defense liaison.",
-            "total_contact_attempts": 29,
-            "successful_resolutions": 25
+            "availability_status": "available",
+            "verification_notes": "Trust deed verified; annual audit reports reviewed.",
+            "total_contact_attempts": 31,
+            "successful_resolutions": 26
           },
-          "match_score": 68,
-          "relevance_level": "Moderate Relevance",
+          "match_score": 77,
+          "relevance_level": "High Relevance",
           "rationale": [
-            "Direct category match in Food & Essentials.",
-            "Offers relevant support matching your request keywords: \"dry\", \"ration\".",
-            "Formally verified organisation with audited registration."
+            "Direct category match in Education.",
+            "Offers relevant support matching your request keywords: \"and\", \"study\", \"materials\".",
+            "Formally verified organisation with audited registration.",
+            "Currently active and accepting direct assistance requests."
           ],
           "missingCriteria": [
-            "Located outside your direct locality (Bengaluru, Karnataka); national or outstation coordination required.",
-            "Operating under high volume with limited immediate capacity."
+            "Located outside your direct locality (Mumbai, Maharashtra); national or outstation coordination required."
           ],
           "rank": 2,
           "is_best_match": false
         },
         {
           "provider": {
-            "id": "p-she-01",
-            "name": "Basera Night Shelter & Rehab Center",
-            "description": "Temporary overnight shelter, bedding, hygiene facilities, and social worker reintegration support for unhoused individuals.",
+            "id": "p-med-01",
+            "name": "Jeevan Raksha Patient Navigators",
+            "description": "Guidance for government tertiary care hospitals, blood donor coordination, and non-emergency medicine subsidy navigation.",
             "categories": [
-              "shelter_and_support"
+              "medical_assistance"
             ],
-            "phone": "+91 98108 90123",
-            "email": "shelter@basera-delhi.org",
-            "website": "https://basera-delhi.org",
-            "address": "Near Old Delhi Railway Station, Kashmere Gate",
+            "phone": "+91 97110 56789",
+            "email": "navigators@jeevanraksha.org",
+            "website": "https://jeevanraksha.org",
+            "address": "Ansari Nagar East, Near AIIMS Campus",
             "city": "New Delhi",
             "state": "Delhi",
-            "pin_code": "110006",
+            "pin_code": "110029",
             "service_areas": [
               "New Delhi",
-              "North Delhi",
-              "Central Delhi"
+              "NCR",
+              "South Delhi"
             ],
-            "eligibility_criteria": "Unhoused individuals, stranded travelers, or domestic violence survivors needing emergency temporary shelter.",
+            "eligibility_criteria": "Economically weaker section patients undergoing major medical interventions at public hospitals. Note: Emergency cases must call 112 / 108 directly.",
             "assistance_types": [
-              "Temporary Overnight Shelter",
-              "Bedding & Clean Water",
-              "Social Worker Counseling"
+              "Hospital Navigation",
+              "Blood Donor Coordination",
+              "Medicine Subsidy Info"
             ],
             "verification_status": "verified",
             "availability_status": "available",
-            "verification_notes": "DUSIB (Delhi Urban Shelter Improvement Board) empanelled shelter facility.",
-            "total_contact_attempts": 38,
-            "successful_resolutions": 35
+            "verification_notes": "Hospital social work department affiliation confirmed. Verified NGO status.",
+            "total_contact_attempts": 53,
+            "successful_resolutions": 47
           },
-          "match_score": 31,
+          "match_score": 43,
           "relevance_level": "Potential Alternative",
           "rationale": [
-            "Offers relevant support matching your request keywords: \"temporary\", \"support\".",
+            "Offers relevant support matching your request keywords: \"for\", \"and\".",
+            "Operates locally within your city (New Delhi) and active service area.",
             "Formally verified organisation with audited registration.",
             "Currently active and accepting direct assistance requests."
           ],
           "missingCriteria": [
-            "Provider does not explicitly list category Food & Essentials.",
-            "Located outside your direct locality (New Delhi, Delhi); national or outstation coordination required."
+            "Provider does not explicitly list category Education."
           ],
           "rank": 3,
           "is_best_match": false
@@ -352,6 +375,167 @@
       "resolution_notes": "Received all textbooks directly from Vidya Deep. Extremely grateful."
     },
     {
+      "id": "req-1793796775160",
+      "tracking_code": "MD-2026-I4IKO",
+      "beneficiary_id": "guest-1793796775160",
+      "beneficiary_name": "Beneficiary",
+      "category": "food_and_essentials",
+      "title": "Dry ration kit needed",
+      "description": "Temporary wage loss in Lucknow",
+      "city": "Lucknow",
+      "state": "State",
+      "pin_code": "",
+      "urgency": "standard",
+      "assistance_type": "General Support",
+      "preferred_contact_method": "phone",
+      "contact_phone": "+91 94151 22334",
+      "contact_phone_masked": "+91 94 •••• 34",
+      "status": "assistance_offered",
+      "voice_note_url": null,
+      "consent_given": true,
+      "created_at": "2026-11-04T12:52:55.160Z",
+      "updated_at": "2026-11-04T12:52:55.164Z",
+      "matches": [
+        {
+          "provider": {
+            "id": "p-food-01",
+            "name": "Aahar Sewa Community Kitchen",
+            "description": "Daily cooked hot meals and weekly dry grocery rations for daily wage workers and destitute families.",
+            "categories": [
+              "food_and_essentials"
+            ],
+            "phone": "+91 94150 12345",
+            "email": "kitchen@aahar-sewa.in",
+            "website": "https://aahar-sewa.in",
+            "address": "Near Charbagh Railway Station, Aminabad Road",
+            "city": "Lucknow",
+            "state": "Uttar Pradesh",
+            "pin_code": "226004",
+            "service_areas": [
+              "Lucknow",
+              "Charbagh",
+              "Aminabad",
+              "Alambagh"
+            ],
+            "eligibility_criteria": "Families without regular income, homeless persons, and emergency food crisis cases.",
+            "assistance_types": [
+              "Cooked Meals",
+              "Grocery Rations",
+              "Daily Necessities"
+            ],
+            "verification_status": "verified",
+            "availability_status": "available",
+            "verification_notes": "Kitchen hygiene inspected by local food safety volunteer; on-site operations verified.",
+            "total_contact_attempts": 65,
+            "successful_resolutions": 61
+          },
+          "match_score": 83,
+          "relevance_level": "High Relevance",
+          "rationale": [
+            "Direct category match in Food & Essentials.",
+            "Offers relevant support matching your request keywords: \"dry\", \"wage\".",
+            "Operates locally within your city (Lucknow) and active service area.",
+            "Formally verified organisation with audited registration.",
+            "Currently active and accepting direct assistance requests."
+          ],
+          "missingCriteria": [],
+          "rank": 1,
+          "is_best_match": true
+        },
+        {
+          "provider": {
+            "id": "p-food-02",
+            "name": "Bengaluru Annapoorna Collective",
+            "description": "Emergency grocery kits (rice, pulses, oil, flour) delivered to distressed urban households.",
+            "categories": [
+              "food_and_essentials"
+            ],
+            "phone": "+91 80223 98765",
+            "email": "help@annapoorna-blr.org",
+            "website": "https://annapoorna-blr.org",
+            "address": "14th Cross, Wilson Garden",
+            "city": "Bengaluru",
+            "state": "Karnataka",
+            "pin_code": "560027",
+            "service_areas": [
+              "Bengaluru",
+              "South Bengaluru",
+              "Central Bengaluru"
+            ],
+            "eligibility_criteria": "Immediate food emergency or stranded migrant workers with no ration card access.",
+            "assistance_types": [
+              "Dry Ration Kits",
+              "Emergency Food Aid"
+            ],
+            "verification_status": "verified",
+            "availability_status": "limited",
+            "verification_notes": "Volunteer network operational. Verified via city civil defense liaison.",
+            "total_contact_attempts": 29,
+            "successful_resolutions": 25
+          },
+          "match_score": 68,
+          "relevance_level": "Moderate Relevance",
+          "rationale": [
+            "Direct category match in Food & Essentials.",
+            "Offers relevant support matching your request keywords: \"dry\", \"ration\".",
+            "Formally verified organisation with audited registration."
+          ],
+          "missingCriteria": [
+            "Located outside your direct locality (Bengaluru, Karnataka); national or outstation coordination required.",
+            "Operating under high volume with limited immediate capacity."
+          ],
+          "rank": 2,
+          "is_best_match": false
+        },
+        {
+          "provider": {
+            "id": "p-she-01",
+            "name": "Basera Night Shelter & Rehab Center",
+            "description": "Temporary overnight shelter, bedding, hygiene facilities, and social worker reintegration support for unhoused individuals.",
+            "categories": [
+              "shelter_and_support"
+            ],
+            "phone": "+91 98108 90123",
+            "email": "shelter@basera-delhi.org",
+            "website": "https://basera-delhi.org",
+            "address": "Near Old Delhi Railway Station, Kashmere Gate",
+            "city": "New Delhi",
+            "state": "Delhi",
+            "pin_code": "110006",
+            "service_areas": [
+              "New Delhi",
+              "North Delhi",
+              "Central Delhi"
+            ],
+            "eligibility_criteria": "Unhoused individuals, stranded travelers, or domestic violence survivors needing emergency temporary shelter.",
+            "assistance_types": [
+              "Temporary Overnight Shelter",
+              "Bedding & Clean Water",
+              "Social Worker Counseling"
+            ],
+            "verification_status": "verified",
+            "availability_status": "available",
+            "verification_notes": "DUSIB (Delhi Urban Shelter Improvement Board) empanelled shelter facility.",
+            "total_contact_attempts": 38,
+            "successful_resolutions": 35
+          },
+          "match_score": 31,
+          "relevance_level": "Potential Alternative",
+          "rationale": [
+            "Offers relevant support matching your request keywords: \"temporary\", \"support\".",
+            "Formally verified organisation with audited registration.",
+            "Currently active and accepting direct assistance requests."
+          ],
+          "missingCriteria": [
+            "Provider does not explicitly list category Food & Essentials.",
+            "Located outside your direct locality (New Delhi, Delhi); national or outstation coordination required."
+          ],
+          "rank": 3,
+          "is_best_match": false
+        }
+      ]
+    },
+    {
       "id": "req-demo-01",
       "tracking_code": "MD-2026-EDU1",
       "beneficiary_id": "user-demo-ben1",
@@ -367,8 +551,8 @@
       "preferred_contact_method": "phone",
       "contact_phone_masked": "+91 98711 ••••5",
       "status": "matched",
-      "created_at": "2026-11-02T12:52:55.123Z",
-      "updated_at": "2026-11-03T12:52:55.132Z",
+      "created_at": "2026-11-02T13:49:55.623Z",
+      "updated_at": "2026-11-03T13:49:55.624Z",
       "matches": [
         {
           "provider": {
@@ -400,7 +584,7 @@
             "verification_status": "verified",
             "availability_status": "available",
             "verification_notes": "Physical address verified and 80G registration documentation audited.",
-            "total_contact_attempts": 44,
+            "total_contact_attempts": 42,
             "successful_resolutions": 38
           },
           "match_score": 100,
@@ -445,8 +629,8 @@
             "verification_status": "verified",
             "availability_status": "available",
             "verification_notes": "Trust deed verified; annual audit reports reviewed.",
-            "total_contact_attempts": 32,
-            "successful_resolutions": 27
+            "total_contact_attempts": 31,
+            "successful_resolutions": 26
           },
           "match_score": 77,
           "relevance_level": "High Relevance",
@@ -526,10 +710,10 @@
       "preferred_contact_method": "phone",
       "contact_phone_masked": "+91 94155 ••••9",
       "status": "resolved_by_user_confirmation",
-      "resolved_confirmed_at": "2026-11-04T07:52:55.132Z",
+      "resolved_confirmed_at": "2026-11-04T08:49:55.624Z",
       "resolution_notes": "Received ration kit from Aahar Sewa. Thank you for the direct assistance.",
-      "created_at": "2026-10-31T12:52:55.132Z",
-      "updated_at": "2026-11-04T07:52:55.132Z",
+      "created_at": "2026-10-31T13:49:55.624Z",
+      "updated_at": "2026-11-04T08:49:55.624Z",
       "matches": [
         {
           "provider": {
@@ -652,7 +836,7 @@
             "verification_status": "verified",
             "availability_status": "available",
             "verification_notes": "Physical address verified and 80G registration documentation audited.",
-            "total_contact_attempts": 44,
+            "total_contact_attempts": 42,
             "successful_resolutions": 38
           },
           "match_score": 31,
@@ -789,6 +973,14 @@
       "update_title": "Assistance Offered by Community Helper",
       "update_description": "Volunteer offered: \"Can provide 5kg flour and rice pack.\". Waiting for beneficiary coordination.",
       "created_at": "2026-11-04T12:52:55.164Z"
+    },
+    {
+      "id": "upd-1793802593395",
+      "request_id": "req-1793802593395",
+      "status_to": "matched",
+      "update_title": "Request Registered & Initial Matches Identified",
+      "update_description": "Case initialized in New Delhi. Found 3 matching support providers.",
+      "created_at": "2026-11-04T14:29:53.395Z"
     }
   ],
   "assistanceOffers": [
@@ -815,5 +1007,5 @@
     }
   ],
   "reports": [],
-  "updated_at": "2026-11-04T12:52:55.166Z"
+  "updated_at": "2026-11-04T14:31:54.182Z"
 }
