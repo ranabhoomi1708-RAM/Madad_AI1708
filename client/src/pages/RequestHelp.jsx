@@ -24,7 +24,12 @@ export default function RequestHelp({ onHelpSubmitted, setActivePage }) {
     assistance_type: '',
     preferred_contact_method: 'phone',
     phone: '',
-    consent_given: false
+    consent_given: false,
+    // Helper flow fields
+    helper_mode: false,
+    beneficiary_name: '',
+    beneficiary_phone: '',
+    proxy_consent: false
   });
 
   const [voiceNoteBlob, setVoiceNoteBlob] = useState(null);

@@ -1,10 +1,14 @@
-import { Router } from "express";
+import { randomBytes } from "crypto"; import { Router } from "express";
 import multer from "multer";
 import bcrypt from "bcryptjs";
 import { db } from "../data/store.js";
 import { signToken } from "../services/auth.js";
-import { authenticate } from "../middleware/auth.js";
+import { authenticate, optionalAuth, requireAdmin, isAdminUser } from "../middleware/auth.js";
 import { validate, requestSchema, contactAttemptSchema, offerSchema } from "../middleware/validator.js";
+import smsAdapter from '../services/smsAdapter.js';
+import { createRateLimiter } from "../middleware/rateLimit.js";
+
+const requestLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 10, name: "requests" });
 
 const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
@@ -41,6 +45,11 @@ router.post("/auth/register", async (req, res) => {
     return res.status(400).json({ success: false, error: { message: "Email, full name and password required" } });
   }
 
+  const requestedRole = String(role || "beneficiary").toLowerCase();
+  if (!["beneficiary", "volunteer"].includes(requestedRole)) {
+    return res.status(400).json({ success: false, error: { message: "Role must be beneficiary or volunteer" } });
+  }
+
   const existing = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
   if (existing) {
     return res.status(409).json({ success: false, error: { message: "User with this email already exists" } });
@@ -50,7 +59,7 @@ router.post("/auth/register", async (req, res) => {
   const newUser = {
     id: "user-" + Date.now(),
     email: email.trim().toLowerCase(),
-    role: role || "beneficiary",
+    role: requestedRole,
     full_name: full_name.trim(),
     city: city || "Delhi",
     state: state || "Delhi",
@@ -97,13 +106,13 @@ router.post("/auth/forgot-password", (req, res) => {
   const user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
   if (!user) return res.status(404).json({ success: false, error: { message: "User not found" } });
 
-  const resetToken = "reset-" + Math.random().toString(36).substring(2, 15);
+  const resetToken = "reset-" + randomBytes(16).toString("hex");
   const expires = new Date(Date.now() + 15 * 60 * 1000).toISOString();
   user.reset_token = resetToken;
   user.reset_expires = expires;
   db.persist();
 
-  res.json({ success: true, data: { resetToken, expires }, message: "Password reset token generated (valid for 15 minutes)" });
+  console.log("[Password reset] Token for " + user.email + ": " + resetToken + " (valid 15 min)"); if (process.env.EXPOSE_RESET_TOKEN === "true") { return res.json({ success: true, data: { resetToken, expires }, message: "Password reset token generated (valid for 15 minutes)" }); } res.json({ success: true, message: "If this email is registered, a reset code has been issued." });
 });
 
 router.post("/auth/reset-password", async (req, res) => {
@@ -149,14 +158,56 @@ router.get("/providers/:id", (req, res) => {
 });
 
 // 4. Assistance Requests
-// Protected request submission
-router.post("/requests", authenticate, validate(requestSchema), (req, res) => {
+// Anonymous beneficiaries are allowed. Helper mode (filing on someone's behalf)
+// needs a logged-in Volunteer, and helper_id always comes from the login.
+router.post("/requests", requestLimiter, optionalAuth, (req, res, next) => {
+  if (req.body && req.body.helper_mode === true) {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: { message: "Login required to submit a request on someone's behalf" } });
+    }
+    if (String(req.user.role).toLowerCase() !== "volunteer") {
+      return res.status(403).json({ success: false, error: { message: "Only volunteers can submit a request on someone's behalf" } });
+    }
+  }
+  next();
+}, validate(requestSchema), async (req, res) => {
   try {
-    const newRequest = db.createRequest(req.body, req.user);
-    res.status(201).json({
+    const body = { ...req.body };
+    delete body.helper_id; // never trust a client-sent helper id
+
+    const helperMode = body.helper_mode === true;
+    if (helperMode) {
+      if (body.proxy_consent !== true) {
+        return res.status(400).json({ success: false, error: { message: "The beneficiary's consent is required to submit on their behalf" } });
+      }
+      body.helper_id = req.user.id;
+    } else {
+      delete body.proxy_consent;
+    }
+    delete body.helper_mode;
+
+    const countBefore = db.requests.length;
+    const newRequest = await db.createRequest(body, helperMode ? null : req.user);
+    const isDuplicate = db.requests.length === countBefore;
+
+    // SMS only for genuinely new requests; a failed SMS must not fail the request
+    if (!isDuplicate) {
+      try {
+        const smsMsg = `Your MADAD request ${newRequest.tracking_code} has been registered. Our team will contact you soon.`;
+        await smsAdapter.send(smsMsg, newRequest.id, newRequest.contact_phone);
+      } catch (smsErr) {
+        console.error("SMS send failed:", smsErr.message);
+      }
+    }
+
+    // Never send the full phone number back
+    const { contact_phone, ...safeRequest } = newRequest;
+    res.status(isDuplicate ? 200 : 201).json({
       success: true,
-      data: newRequest,
-      message: "Help request registered and matched successfully"
+      data: safeRequest,
+      message: isDuplicate
+        ? "You already have an open request in this category. We linked you to it."
+        : "Help request registered and matched successfully"
     });
   } catch (err) {
     res.status(500).json({ success: false, error: { message: err.message } });
@@ -172,7 +223,9 @@ router.get("/requests/track/:code", (req, res) => {
       error: { code: "NOT_FOUND", message: `No request found with tracking code: ${req.params.code}` }
     });
   }
-  res.json({ success: true, data: record });
+  // Public endpoint: expose only non-sensitive fields (never the phone number)
+  const { contact_phone, helper_id, beneficiary_id, voice_note_url, ...publicRecord } = record;
+  res.json({ success: true, data: publicRecord });
 });
 
 // User-specific requests
@@ -184,6 +237,19 @@ router.get("/users/:id/requests", authenticate, (req, res) => {
   const userRequests = db.requests.filter(r => r.beneficiary_id === requestedId);
   res.json({ success: true, data: userRequests });
 });
+
+// Only the request owner, the volunteer who filed it, an admin, or someone holding the tracking code may act on a request
+function ownsRequest(req, res, next) {
+  const record = db.getRequestById(req.params.id);
+  if (!record) {
+    return res.status(404).json({ success: false, error: { message: "Request not found" } });
+  }
+  const u = req.user;
+  const isOwner = record.beneficiary_id === u.id || record.helper_id === u.id;
+  const hasCode = !!(req.body && req.body.tracking_code && req.body.tracking_code === record.tracking_code);
+  if (isOwner || hasCode || isAdminUser(u)) return next();
+  return res.status(403).json({ success: false, error: { message: "You can only update your own request" } });
+}
 
 // 5. Contact Attempts & Smart Fallback
 router.post("/requests/:id/contact-attempts", authenticate, validate(contactAttemptSchema), (req, res) => {
@@ -201,7 +267,7 @@ router.post("/requests/:id/contact-attempts", authenticate, validate(contactAtte
 });
 
 // 6. User-Confirmed Resolution
-router.post("/requests/:id/confirm-resolution", authenticate, (req, res) => {
+router.post("/requests/:id/confirm-resolution", authenticate, ownsRequest, (req, res) => {
   try {
     const { feedback_rating, comments, provider_id } = req.body;
     const updated = db.confirmResolution(req.params.id, { rating: feedback_rating, comments, provider_id });
@@ -215,7 +281,7 @@ router.post("/requests/:id/confirm-resolution", authenticate, (req, res) => {
   }
 });
 
-router.post("/requests/:id/still-need-help", authenticate, (req, res) => {
+router.post("/requests/:id/still-need-help", authenticate, ownsRequest, (req, res) => {
   try {
     const { notes } = req.body;
     const updated = db.stillNeedHelp(req.params.id, notes);
@@ -250,12 +316,12 @@ router.post("/give-help/requests/:id/offer", authenticate, validate(offerSchema)
 });
 
 // 8. Admin Dashboard
-router.get("/admin/metrics", (req, res) => {
+router.get("/admin/metrics", requireAdmin, (req, res) => {
   const metrics = db.getAdminMetrics();
   res.json({ success: true, data: metrics });
 });
 
-router.patch("/admin/providers/:id/verification", (req, res) => {
+router.patch("/admin/providers/:id/verification", requireAdmin, (req, res) => {
   const { status, notes, admin_name } = req.body;
   if (!status) {
     return res.status(400).json({ success: false, error: { message: "Status required" } });
@@ -320,7 +386,7 @@ router.post("/reports", (req, res) => {
   }
 });
 
-router.get("/admin/reports", (req, res) => {
+router.get("/admin/reports", requireAdmin, (req, res) => {
   res.json({
     success: true,
     data: db.reports

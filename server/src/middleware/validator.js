@@ -17,6 +17,10 @@ export const requestSchema = z.object({
   assistance_type: z.string().min(2, "Specific assistance type is required"),
   preferred_contact_method: z.string().default("phone"),
   phone: z.string().min(7, "Valid contact telephone number is required"),
+  helper_id: z.string().optional(),
+  proxy_consent: z.boolean().optional(),
+  helper_mode: z.boolean().optional(),
+  beneficiary_name: z.string().max(100).optional(),
   consent_given: z.union([z.boolean(), z.string()]).refine(val => val === true || val === "true", {
     message: "Consent to assist and share relevant details with providers is required"
   })

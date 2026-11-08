@@ -1,20 +1,14 @@
-# Dependencies
 node_modules/
-client/node_modules/
-server/node_modules/
-
-# Production builds
-dist/
-client/dist/
-
-# Environment files
 .env
-.env.local
-server/.env
-client/.env
-
-# Logs and system
-*.log
-npm-debug.log*
-.DS_Store
-Thumbs.db
+.env.*
+server/data/madad_store.json
+server/data/madad_store.backup.json
+*.bak
+*.bak2
+*.bak3
+*.bak4
+*.bak5
+*.bak6
+server/src_backup/
+server/src_manual_backup/
+client/dist/server_backup*/

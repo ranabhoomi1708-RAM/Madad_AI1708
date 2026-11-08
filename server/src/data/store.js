@@ -6,8 +6,7 @@ import { matchProviders } from "../services/matcher.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const STORAGE_FILE = path.resolve(__dirname, "../../data/madad_store.json");
-
+const STORAGE_FILE = process.env.MADAD_DATA_FILE ? path.resolve(process.env.MADAD_DATA_FILE) : path.resolve(__dirname, "../../data/madad_store.json");
 class DataStore {
   constructor() {
     this.providers = [...SEED_PROVIDERS];
@@ -187,31 +186,48 @@ class DataStore {
 
   // --- HELP REQUESTS ---
   createRequest(data, user = null) {
-    const trackingCode = "MD-" + new Date().getFullYear() + "-" + Math.random().toString(36).substring(2, 7).toUpperCase();
-    const requestId = "req-" + Date.now();
+      // Duplicate detection: same masked phone and category within 48h -> link to existing request
+      const maskedPhone = this.maskPhone(data.phone);
+      const now = Date.now();
+      const existing = this.requests.find(r =>
+        r.contact_phone === (data.phone || "") &&
+        r.category === data.category &&
+        r.status !== "resolved_by_user_confirmation" &&
+        now - new Date(r.created_at).getTime() <= 48 * 60 * 60 * 1000);
+      if (existing) {
+        // Return existing request without creating a new one
+        return existing;
+      }
 
-    const newRequest = {
-      id: requestId,
-      tracking_code: trackingCode,
-      beneficiary_id: user ? user.id : (data.beneficiary_id || "guest-" + Date.now()),
-      beneficiary_name: user ? user.full_name : (data.beneficiary_name || "Beneficiary"),
-      category: data.category,
-      title: data.title,
-      description: data.description,
-      city: data.city,
-      state: data.state || "State",
-      pin_code: data.pin_code || "",
-      urgency: data.urgency || "standard",
-      assistance_type: data.assistance_type || "General Support",
-      preferred_contact_method: data.preferred_contact_method || "phone",
-      contact_phone: data.phone || "",
-      contact_phone_masked: this.maskPhone(data.phone),
-      status: "matched",
-      voice_note_url: data.voice_note_url || null,
-      consent_given: data.consent_given === true || data.consent_given === "true",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
+      const trackingCode = "MD-" + new Date().getFullYear() + "-" + Math.random().toString(36).substring(2, 7).toUpperCase();
+      const requestId = "req-" + Date.now();
+
+      const newRequest = {
+        id: requestId,
+        tracking_code: trackingCode,
+        beneficiary_id: user ? user.id : (data.beneficiary_id || "guest-" + Date.now()),
+        beneficiary_name: user ? user.full_name : (data.beneficiary_name || "Beneficiary"),
+        category: data.category,
+        title: data.title,
+        description: data.description,
+        city: data.city,
+        state: data.state || "State",
+        pin_code: data.pin_code || "",
+        urgency: data.urgency || "standard",
+        assistance_type: data.assistance_type || "General Support",
+        preferred_contact_method: data.preferred_contact_method || "phone",
+        contact_phone: data.phone || "",
+        contact_phone_masked: this.maskPhone(data.phone),
+        status: "matched",
+        voice_note_url: data.voice_note_url || null,
+        consent_given: data.consent_given === true || data.consent_given === "true",
+        helper_id: data.helper_id || null,
+        proxy_consent: data.proxy_consent === true,
+        // Store consent timestamp if proxy consent provided
+        consent_timestamp: data.proxy_consent === true ? new Date().toISOString() : null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
 
     const matches = matchProviders(newRequest, this.providers);
     newRequest.matches = matches;
